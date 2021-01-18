@@ -288,8 +288,8 @@ def main():
     csv_data_1 = get_convert_data(CSVReader, "csv_data_1.csv")
     combine.load_data("csv_data_1.csv", csv_data_1)
 
-    csv_data_3 = get_convert_data(CSVReader, "test.csv")
-    combine.load_data("csv_data_3.csv", csv_data_3)
+    # csv_data_3 = get_convert_data(CSVReader, "test.csv")
+    # combine.load_data("csv_data_3.csv", csv_data_3)
     # print("csv_data_3", csv_data_3)
 
     csv_data_2 = get_convert_data(CSVReader, "csv_data_2.csv")
