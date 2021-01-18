@@ -306,10 +306,15 @@ def main():
     combine_basic_data = combine.combine_to_basic_data()
     combine.save('basic_results.tsv', combine_basic_data)
 
-    combine_advanced_data = combine.combine_to_advanced_data()
-    combine.save('advanced_results.tsv', combine_advanced_data)
+    adv = input("Create advanced data file? y/n")
+    if adv == "y":
+        combine_advanced_data = combine.combine_to_advanced_data()
+        combine.save('advanced_results.tsv', combine_advanced_data)
 
-    combine.view_errors()
+    er = input("View errors? y/n")
+    if er == "y":
+        combine.view_errors()
+
     print(time.time() - start_search)
 
 
