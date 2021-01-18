@@ -270,8 +270,12 @@ def get_convert_data(reader, file):
     Returns a an unordered array data
     """
     convertor = reader.make_convertor()
+
     data = convertor.read_file(file)
-    convert_data = convertor.convert_data(data)
+    if data is not None:
+        convert_data = convertor.convert_data(data)
+    else:
+        convert_data = []
     return convert_data
 
 
@@ -280,6 +284,7 @@ def main():
     start_search = time.time()
 
     combine = Combine()
+
     csv_data_1 = get_convert_data(CSVReader, "csv_data_1.csv")
     combine.load_data("csv_data_1.csv", csv_data_1)
 
