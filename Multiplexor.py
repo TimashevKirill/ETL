@@ -176,7 +176,7 @@ class Combine:
                             self.errors.append(error)
                     except KeyError:
                         pass
-                        # row_array.append(" ")
+                        row_array.append(" ")
 
                 for i in self.headers_m:
                     try:
