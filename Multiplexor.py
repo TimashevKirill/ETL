@@ -2,9 +2,9 @@ import csv
 import json
 from xml.dom import minidom
 import os.path
-import time
 from operator import itemgetter
 from itertools import zip_longest
+import random
 
 
 class FileReader:
@@ -128,11 +128,14 @@ class Combine:
 
     def load_data(self, name_chunk, data):
         """
+        :param name_chunk: Name directory for to specify the path when generating errors
+        :param data: Convert data
         Loads data into a single shared array
         and calculates the longest sequence of headers
          """
-
+        # print("data", data, name_chunk)
         if len(data[0]) > len(self.max_len_headers_data):
+
             self.max_len_headers_data = data[0]
         self.array_data[name_chunk] = data
 
@@ -162,6 +165,7 @@ class Combine:
         ordered array
         """
         combine_data_array = []
+        # print("self.array_data", self.array_data)
         for data in self.array_data:
             for index_line, row in enumerate(self.array_data[data]):
                 row_array = []
@@ -198,6 +202,11 @@ class Combine:
         return combine_data_array
 
     def combine_to_advanced_data(self):
+        """
+        This logic combined data and adds strings to each other by a unique key,
+         from all files in one comdine data array.
+        :return: comdine data array
+        """
         row_dict = {}
         combine_data_array = []
         for data in self.array_data:
@@ -233,7 +242,12 @@ class Combine:
                 if str(row_d_array) in row_dict:
                     current_array = row_m_array
                     past_array = row_dict[str(row_d_array)]
-                    sum_arrays = [x + y for x, y in zip_longest(current_array, past_array, fillvalue=0)]
+                    sum_arrays = [
+                        x + y for x,
+                        y in zip_longest(
+                            current_array,
+                            past_array,
+                            fillvalue=0)]
                     row_dict[str(row_d_array)] = sum_arrays
                 else:
                     row_dict[str(row_d_array)] = row_m_array
@@ -247,8 +261,16 @@ class Combine:
 
     def save(self, file_name, combine_data_array):
         """
+        :param file_name: Path to the file
+        :param combine_data_array: Сombine data array
         Saving combineed data in .tsv file.
         """
+        # print(combine_data_array)
+        if os.path.exists(file_name):
+            file_name = file_name
+        else:
+            file_name = "../" + file_name
+
         with open(file_name, 'wt') as out_file:
             tsv_writer = csv.writer(out_file, delimiter='\t')
             for i in combine_data_array:
@@ -267,11 +289,24 @@ class Combine:
 
 def get_convert_data(reader, file):
     """
-    Returns a an unordered array data
+    This logic returns a an unordered array data
+    :param reader: The appropriate class for reading the file
+    :param file: Path to the file
+    :return:Сonvert data
     """
+    # print("file", file)
     convertor = reader.make_convertor()
 
-    data = convertor.read_file(file)
+    # file_path = os.path.abspath(file)
+    # print("dir", os.path.dirname(file))
+
+    # print("file_path", file)
+    if os.path.exists(file):
+        data = convertor.read_file(file)
+    else:
+        file = "../" + file
+        data = convertor.read_file(file)
+    # print("datadata", data)
     if data is not None:
         convert_data = convertor.convert_data(data)
     else:
@@ -279,81 +314,41 @@ def get_convert_data(reader, file):
     return convert_data
 
 
-def main():
+def create_test_file(d_count, m_count, row_count):
+    """
+    This logic created a file with any amount of data to test the speed of the algorithm
+    :param d_count: Number of D elements
+    :param m_count: Number of M elements
+    :param row_count: Number of rows
+    """
 
-    start_search = time.time()
+    d = []
+    m = []
+    big_data = []
+    bukv = ['a', 'b', 'c', 'd']
 
-    combine = Combine()
+    d_count = d_count
+    m_count = m_count
+    for i in range(d_count):
+        d.append("D" + str(i + 1))
 
-    csv_data_1 = get_convert_data(CSVReader, "csv_data_1.csv")
-    combine.load_data("csv_data_1.csv", csv_data_1)
+    for i in range(row_count):
+        m_data = []
+        d_data = []
+        for g in range(d_count):
+            d_data.append(random.choice(bukv))
 
-    # csv_data_3 = get_convert_data(CSVReader, "test.csv")
-    # combine.load_data("csv_data_3.csv", csv_data_3)
-    # print("csv_data_3", csv_data_3)
+        for g in range(m_count):
+            m_data.append(g + 1)
 
-    csv_data_2 = get_convert_data(CSVReader, "csv_data_2.csv")
-    combine.load_data("csv_data_2.csv", csv_data_2)
+        big_data.append([*d_data, *m_data])
 
-    json_data = get_convert_data(JsonReader, "json_data.json")
-    combine.load_data("json_data.json", json_data)
+    for i in range(m_count):
+        m.append("M" + str(i + 1))
 
-    xml_data = get_convert_data(XMLReader, "xml_data.xml")
-    combine.load_data("xml_data.xml", xml_data)
-
-    combine.create_headers()
-
-    combine_basic_data = combine.combine_to_basic_data()
-    combine.save('basic_results.tsv', combine_basic_data)
-
-    adv = input("Create advanced data file? y/n")
-    if adv == "y":
-        combine_advanced_data = combine.combine_to_advanced_data()
-        combine.save('advanced_results.tsv', combine_advanced_data)
-
-    er = input("View errors? y/n")
-    if er == "y":
-        combine.view_errors()
-
-    print(time.time() - start_search)
-
-
-if __name__ == "__main__":
-
-    def create_test_file(d_count, m_count):
-        import random
-        start_search = time.time()
-        d = []
-        m = []
-        big_data = []
-        bukv = ['a', 'b', 'c', 'd']
-
-        d_count = d_count
-        m_count = m_count
-        for i in range(d_count):
-            d.append("D" + str(i + 1))
-
-        for i in range(100):
-            m_data = []
-            d_data = []
-            for g in range(d_count):
-                d_data.append(random.choice(bukv))
-
-            for g in range(m_count):
-                m_data.append(g + 1)
-
-            big_data.append([*d_data, *m_data])
-
-        for i in range(m_count):
-            m.append("M" + str(i + 1))
-
-        headers = [*d, *m]
-        big_data = [*[headers], *big_data]
-        with open('test.csv', 'wt') as out_file:
-            tsv_writer = csv.writer(out_file)
-            for i in big_data:
-                tsv_writer.writerow(i)
-        print(time.time() - start_search)
-    # create_test_file(1000, 10000)
-
-    main()
+    headers = [*d, *m]
+    big_data = [*[headers], *big_data]
+    with open('Input_data/test.csv', 'wt') as out_file:
+        tsv_writer = csv.writer(out_file)
+        for i in big_data:
+            tsv_writer.writerow(i)
