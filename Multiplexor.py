@@ -133,7 +133,7 @@ class Combine:
         Loads data into a single shared array
         and calculates the longest sequence of headers
          """
-        # print("data", data, name_chunk)
+
         if len(data[0]) > len(self.max_len_headers_data):
 
             self.max_len_headers_data = data[0]
@@ -165,7 +165,7 @@ class Combine:
         ordered array
         """
         combine_data_array = []
-        # print("self.array_data", self.array_data)
+
         for data in self.array_data:
             for index_line, row in enumerate(self.array_data[data]):
                 row_array = []
@@ -265,7 +265,7 @@ class Combine:
         :param combine_data_array: Сombine data array
         Saving combineed data in .tsv file.
         """
-        # print(combine_data_array)
+
         if os.path.exists(file_name):
             file_name = file_name
         else:
@@ -294,19 +294,15 @@ def get_convert_data(reader, file):
     :param file: Path to the file
     :return:Сonvert data
     """
-    # print("file", file)
+
     convertor = reader.make_convertor()
 
-    # file_path = os.path.abspath(file)
-    # print("dir", os.path.dirname(file))
-
-    # print("file_path", file)
     if os.path.exists(file):
         data = convertor.read_file(file)
     else:
         file = "../" + file
         data = convertor.read_file(file)
-    # print("datadata", data)
+
     if data is not None:
         convert_data = convertor.convert_data(data)
     else:
