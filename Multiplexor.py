@@ -16,10 +16,16 @@ class FileReader:
     class Convertor:
 
         def read_file(self, file):
-            """Read function of the file"""
+            """Read function of the file
+            :param file: File path
+            :return Data from file
+            """
 
         def convert_data(self, file_data):
-            """Function for converting file data to an array of dictionaries"""
+            """Function for converting file data to an array of dictionaries
+            :param file_data: Data from loaded file
+            :return Dicts array
+            """
 
 
 class CSVReader(FileReader):
@@ -28,7 +34,11 @@ class CSVReader(FileReader):
     class Convertor:
 
         def read_file(self, file):
-            """Read function of the file"""
+            """
+            Read function of the file
+            :param file: File path
+            :return Data from file
+            """
 
             if os.path.exists(file):
                 f_data = open(file)
@@ -36,13 +46,17 @@ class CSVReader(FileReader):
             else:
                 return None
 
-        def convert_data(self, file):
-            """Function for converting file data to an array of dictionaries"""
+        def convert_data(self, file_data):
+            """
+            Function for converting file data to an array of dictionaries
+            :param file_data: Data from loaded file
+            :return Dicts array
+            """
 
             dicts_array = []
             try:
-                dicts_array = list(csv.DictReader(file, delimiter=','))
-                file.close()
+                dicts_array = list(csv.DictReader(file_data, delimiter=','))
+                file_data.close()
             except Exception as e:
                 print(e)
             finally:
@@ -55,7 +69,11 @@ class JsonReader(FileReader):
     class Convertor:
 
         def read_file(self, file):
-            """Read function of the file"""
+            """
+            Read function of the file
+            :param file: File path
+            :return Data from file
+            """
 
             if os.path.exists(file):
                 with open(file, encoding="utf-8") as f_data:
@@ -64,7 +82,11 @@ class JsonReader(FileReader):
                 return None
 
         def convert_data(self, file_data):
-            """Function for converting file data to an array of dictionaries"""
+            """
+            Function for converting file data to an array of dictionaries
+            :param file_data: Data from loaded file
+            :return Dicts array
+            """
 
             dicts_array = []
             try:
@@ -84,7 +106,11 @@ class XMLReader(FileReader):
     class Convertor:
 
         def read_file(self, file):
-            """Read function of the file"""
+            """
+            Read function of the file
+            :param file: File path
+            :return Data from file
+            """
 
             if os.path.exists(file):
                 f_data = minidom.parse(file)
@@ -93,7 +119,11 @@ class XMLReader(FileReader):
                 return None
 
         def convert_data(self, file_data):
-            """Function for converting file data to an array of dictionaries"""
+            """
+            Function for converting file data to an array of dictionaries
+            :param file_data: Data from loaded file
+            :return Dicts array
+            """
 
             dicts_array = []
             elem_dict = {}
