@@ -1,4 +1,4 @@
 import cProfile
-import main
+from ETL import main
 
 cProfile.run('main.main()')

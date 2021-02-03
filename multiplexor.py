@@ -7,11 +7,12 @@ from itertools import zip_longest
 import random
 
 
+
 class FileDataManager:
 
     @classmethod
-    def make_convertor(Class):
-        return Class.Convertor()
+    def make_data_worker(Class):
+        return Class.DataWorker()
 
     @classmethod
     def make_reader(Class):
@@ -24,8 +25,8 @@ class FileDataManager:
             :return Data from file
             """
 
-    class Convertor:
-        def convert_data(self, file_data):
+    class DataWorker:
+        def convert_data_to_gener(self, file_data):
             """Function for converting file data to an array of dictionaries
             :param file_data: Data from loaded file
             :return Dicts array
@@ -49,22 +50,24 @@ class CSVDataManager(FileDataManager):
             else:
                 return None
 
-    class Convertor:
-        def convert_data(self, file_data):
+    class DataWorker:
+        def convert_data_to_gener(self, file_data):
             """
             Function for converting file data to an array of dictionaries
             :param file_data: Data from loaded file
             :return Dicts array
             """
-
-            dicts_array = []
+            generator_of_dicts = (i for i in [])
+            # dicts_array = []
             try:
                 dicts_array = list(csv.DictReader(file_data, delimiter=','))
+                # Create new generator of dictionaries to close a CSV file
+                generator_of_dicts = (i for i in dicts_array)
                 file_data.close()
             except Exception as e:
                 print(e)
             finally:
-                return dicts_array
+                return generator_of_dicts
 
 
 class JsonDataManager(FileDataManager):
@@ -84,24 +87,24 @@ class JsonDataManager(FileDataManager):
             else:
                 return None
 
-    class Convertor:
-        def convert_data(self, file_data):
+    class DataWorker:
+        def convert_data_to_gener(self, file_data):
             """
             Function for converting file data to an array of dictionaries
             :param file_data: Data from loaded file
             :return Dicts array
             """
-
-            dicts_array = []
+            generator_of_dicts = (i for i in [])
             try:
                 data = json.loads(file_data)
                 dicts_array = data["fields"]
-
+                generator_of_dicts = (i for i in dicts_array)
+                del data
+                del dicts_array
             except Exception as e:
                 print(e)
-
             finally:
-                return list(dicts_array)
+                return generator_of_dicts
 
 
 class XMLDataManager(FileDataManager):
@@ -121,27 +124,24 @@ class XMLDataManager(FileDataManager):
             else:
                 return None
 
-    class Convertor:
-        def convert_data(self, file_data):
+    class DataWorker:
+        def convert_data_to_gener(self, file_data):
             """
             Function for converting file data to an array of dictionaries
             :param file_data: Data from loaded file
             :return Dicts array
             """
-
-            dicts_array = []
-            elem_dict = {}
+            generator_of_dicts = (i for i in [])
             try:
                 items = file_data.getElementsByTagName('object')
-                for elem in items:
-                    key = elem.attributes['name'].value
-                    value = elem.childNodes[1].firstChild.nodeValue
-                    elem_dict[key] = value
-                dicts_array.append(elem_dict)
+                dicts_array = {
+                    elem.attributes['name'].value: elem.childNodes[1].firstChild.nodeValue for elem in items}
+                generator_of_dicts = (i for i in [dicts_array])
+                del dicts_array
             except Exception as e:
                 print(e)
             finally:
-                return list(dicts_array)
+                return generator_of_dicts
 
 
 class Combine:
@@ -151,14 +151,22 @@ class Combine:
     Also the ability to view errors that have occurred
     """
 
-    def __init__(self):
+    def __init__(self, errormanager):
         self.array_data = {}
         self.max_len_headers_data = {}
         self.headers_d = []
         self.headers_m = []
         self.combine_data_array = []
-        self.errors = []
         self.headers = []
+        self.ErrorManager = errormanager
+
+    def max_len_headers_load(self, data):
+        """
+        Search and select row with the largest number of data
+        """
+        for i in data:
+            if len(i) > len(self.max_len_headers_data):
+                self.max_len_headers_data = i
 
     def load_data(self, name_chunk, data):
         """
@@ -167,17 +175,12 @@ class Combine:
         Loads data into a single shared array
         and calculates the longest sequence of headers
          """
-
-        if len(data[0]) > len(self.max_len_headers_data):
-
-            self.max_len_headers_data = data[0]
         self.array_data[name_chunk] = data
 
     def create_headers(self):
         """
         Generates a sorted sequence of headers
         """
-
         d_count = 0
         m_count = 0
         for i in self.max_len_headers_data:
@@ -203,6 +206,7 @@ class Combine:
         for data in self.array_data:
             for index_line, row in enumerate(self.array_data[data]):
                 row_array = []
+
                 for i in self.headers_d:
                     try:
                         elem = row[i]
@@ -211,7 +215,7 @@ class Combine:
                         else:
                             error = "File {} has an error(elem not str) of the {} element on the {}th line.".format(
                                 data, i, index_line)
-                            self.errors.append(error)
+                            self.ErrorManager.append_error.append(error)
                     except KeyError:
                         pass
                         row_array.append(" ")
@@ -224,16 +228,17 @@ class Combine:
                         except ValueError:
                             error = "File {} has an error(elem not int) of the {} element on the {}th line.".format(
                                 data, i, index_line)
-                            self.errors.append(error)
+                            self.ErrorManager.append_error(error)
 
                     except KeyError:
                         pass
-                        # row_array.append(" ")
                 combine_data_array.append(row_array)
+
         combine_data_array = sorted(
             combine_data_array, key=itemgetter(0))
         combine_data_array = [*[self.headers], *combine_data_array]
-        return combine_data_array
+        generator_combine_data = (i for i in combine_data_array)
+        return generator_combine_data
 
     def combine_to_advanced_data(self):
         """
@@ -255,7 +260,7 @@ class Combine:
                         else:
                             error = "File {} has an error(elem not str) of the {} element on the {}th line.".format(
                                 data, i, index_line)
-                            self.errors.append(error)
+                            self.ErrorManager.append_error(error)
                     except KeyError:
                         row_d_array.append(' ')
 
@@ -267,18 +272,16 @@ class Combine:
                         except ValueError:
                             error = "File {} has an error(elem not int) of the {} element on the {}th line.".format(
                                 data, i, index_line)
-                            self.errors.append(error)
+                            self.ErrorManager.append_error(error)
 
                     except KeyError:
                         pass
-                        # row_m_array.append(' ')
 
                 if str(row_d_array) in row_dict:
                     current_array = row_m_array
                     past_array = row_dict[str(row_d_array)]
                     sum_arrays = [
-                        x + y for x,
-                        y in zip_longest(
+                        x + y for x, y in zip_longest(
                             current_array,
                             past_array,
                             fillvalue=0)]
@@ -291,29 +294,24 @@ class Combine:
         combine_data_array = sorted(
             combine_data_array, key=itemgetter(0))
         combine_data_array = [*[self.headers], *combine_data_array]
-        return combine_data_array
+        generator_combine_data = (i for i in combine_data_array)
+        return generator_combine_data
 
-    def save(self, file_name, combine_data_array):
-        """
-        :param file_name: Path to the file
-        :param combine_data_array: Сombine data array
-        Saving combineed data in .tsv file.
-        """
 
-        if os.path.exists(file_name):
-            file_name = file_name
-        else:
-            file_name = "../" + file_name
+class ErrorManager:
+    """
+    Class for aggregation and error output
+    """
 
-        with open(file_name, 'wt') as out_file:
-            tsv_writer = csv.writer(out_file, delimiter='\t')
-            for i in combine_data_array:
-                tsv_writer.writerow(i)
+    def __init__(self):
+        self.errors = []
+
+    def append_error(self, error):
+
+        if error not in self.errors:
+            self.errors.append(error)
 
     def view_errors(self):
-        """
-        Shows errors that have occurred.
-        """
         if self.errors:
             for i in self.errors:
                 print(i)
@@ -321,15 +319,52 @@ class Combine:
             print("there are no errors")
 
 
+class FileSaver:
+    """
+    Class for saving data to file
+    """
+
+    def save_data(self, file_name, data):
+        """
+        saving data to file
+        """
+
+
+class TSVSaver(FileSaver):
+    """
+    Class for saving TSV data to file
+    """
+
+    def save_data(self, file_name, data):
+        if os.path.exists(file_name):
+            file_name = file_name
+        else:
+            file_name = "../" + file_name
+        data = list(data)
+        with open(file_name, 'wt') as out_file:
+            tsv_writer = csv.writer(out_file, delimiter='\t')
+            for i in data:
+                tsv_writer.writerow(i)
+
+
+def save_data(saver, file, data):
+    """
+    This logic calls the save function of the passed class
+    :param saver: Saver class
+    :param file: Path to the file
+    :data file: data for saving
+    """
+    saver().save_data(file, data)
+
+
 def get_convert_data(manager, file):
     """
     This logic returns a an unordered array data
-    :param reader: The appropriate class for reading the file
+    :param manager: The appropriate class for reading the file
     :param file: Path to the file
     :return:Сonvert data
     """
-
-    convertor = manager.make_convertor()
+    dataworker = manager.make_data_worker()
     reader = manager.make_reader()
 
     if os.path.exists(file):
@@ -339,10 +374,9 @@ def get_convert_data(manager, file):
         data = reader.read_file(file)
 
     if data is not None:
-        convert_data = convertor.convert_data(data)
+        convert_data = dataworker.convert_data_to_gener(data)
     else:
         convert_data = []
-
     return convert_data
 
 
