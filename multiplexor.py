@@ -320,6 +320,9 @@ class ErrorManager:
         else:
             print("there are no errors")
 
+    def get_errors(self):
+        return self.errors
+
 
 class FileSaver:
     """
