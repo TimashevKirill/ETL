@@ -226,6 +226,7 @@ class Combine:
                             elem = int(row[i])
                             row_array.append(elem)
                         except ValueError:
+                            row_array.append(0)
                             error = "File {} has an error(elem not int) of the {} element on the {}th line.".format(
                                 data, i, index_line)
                             self.ErrorManager.append_error(error)
@@ -270,6 +271,7 @@ class Combine:
                             elem = int(row[i])
                             row_m_array.append(elem)
                         except ValueError:
+                            row_m_array.append(0)
                             error = "File {} has an error(elem not int) of the {} element on the {}th line.".format(
                                 data, i, index_line)
                             self.ErrorManager.append_error(error)

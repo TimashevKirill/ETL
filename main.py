@@ -30,11 +30,11 @@ def main():
     combine.max_len_headers_load(csv_data_1_for_headers)
     combine.load_data("csv_data_1.csv", csv_data_1)
 
-    csv_data_3 = get_convert_data(CSVDataManager, "Input_data/test.csv")
-    csv_data_3_for_headers = get_convert_data(
-        CSVDataManager, "Input_data/test.csv")
-    combine.max_len_headers_load(csv_data_3_for_headers)
-    combine.load_data("csv_data_3.csv", csv_data_3)
+    # csv_data_3 = get_convert_data(CSVDataManager, "Input_data/test.csv")
+    # csv_data_3_for_headers = get_convert_data(
+    #     CSVDataManager, "Input_data/test.csv")
+    # combine.max_len_headers_load(csv_data_3_for_headers)
+    # combine.load_data("csv_data_3.csv", csv_data_3)
 
     csv_data_2 = get_convert_data(CSVDataManager, "Input_data/csv_data_2.csv")
     csv_data_2_for_headers = get_convert_data(
@@ -91,3 +91,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # print(get_convert_data(CSVDataManager, "asd.xml"))
