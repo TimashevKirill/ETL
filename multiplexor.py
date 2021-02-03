@@ -7,20 +7,24 @@ from itertools import zip_longest
 import random
 
 
-class FileReader:
+class FileDataManager:
 
     @classmethod
     def make_convertor(Class):
         return Class.Convertor()
 
-    class Convertor:
+    @classmethod
+    def make_reader(Class):
+        return Class.Reader()
 
+    class Reader:
         def read_file(self, file):
             """Read function of the file
             :param file: File path
             :return Data from file
             """
 
+    class Convertor:
         def convert_data(self, file_data):
             """Function for converting file data to an array of dictionaries
             :param file_data: Data from loaded file
@@ -28,11 +32,10 @@ class FileReader:
             """
 
 
-class CSVReader(FileReader):
+class CSVDataManager(FileDataManager):
     """class reads and convert data from CSV format file"""
 
-    class Convertor:
-
+    class Reader:
         def read_file(self, file):
             """
             Read function of the file
@@ -46,6 +49,7 @@ class CSVReader(FileReader):
             else:
                 return None
 
+    class Convertor:
         def convert_data(self, file_data):
             """
             Function for converting file data to an array of dictionaries
@@ -63,11 +67,10 @@ class CSVReader(FileReader):
                 return dicts_array
 
 
-class JsonReader(FileReader):
+class JsonDataManager(FileDataManager):
     """class reads and convert data from JSON format file"""
 
-    class Convertor:
-
+    class Reader:
         def read_file(self, file):
             """
             Read function of the file
@@ -81,6 +84,7 @@ class JsonReader(FileReader):
             else:
                 return None
 
+    class Convertor:
         def convert_data(self, file_data):
             """
             Function for converting file data to an array of dictionaries
@@ -100,11 +104,10 @@ class JsonReader(FileReader):
                 return list(dicts_array)
 
 
-class XMLReader(FileReader):
+class XMLDataManager(FileDataManager):
     """class reads and convert data from JSON format file"""
 
-    class Convertor:
-
+    class Reader:
         def read_file(self, file):
             """
             Read function of the file
@@ -118,6 +121,7 @@ class XMLReader(FileReader):
             else:
                 return None
 
+    class Convertor:
         def convert_data(self, file_data):
             """
             Function for converting file data to an array of dictionaries
@@ -317,7 +321,7 @@ class Combine:
             print("there are no errors")
 
 
-def get_convert_data(reader, file):
+def get_convert_data(manager, file):
     """
     This logic returns a an unordered array data
     :param reader: The appropriate class for reading the file
@@ -325,18 +329,20 @@ def get_convert_data(reader, file):
     :return:Сonvert data
     """
 
-    convertor = reader.make_convertor()
+    convertor = manager.make_convertor()
+    reader = manager.make_reader()
 
     if os.path.exists(file):
-        data = convertor.read_file(file)
+        data = reader.read_file(file)
     else:
         file = "../" + file
-        data = convertor.read_file(file)
+        data = reader.read_file(file)
 
     if data is not None:
         convert_data = convertor.convert_data(data)
     else:
         convert_data = []
+
     return convert_data
 
 
@@ -347,7 +353,6 @@ def create_test_file(d_count, m_count, row_count):
     :param m_count: Number of M elements
     :param row_count: Number of rows
     """
-
     d = []
     m = []
     big_data = []
